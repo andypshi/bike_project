@@ -1,0 +1,31 @@
+//convert the location name into a search query on google maps 
+function convert_name_string(location_name) {
+  var API_KEY = XXX;
+  var name = location_name.split(" ").join("+") 
+  var baseUrl = 'https://maps.googleapis.com/maps/api/place/textsearch/json?query=';
+  var queryUrl = baseUrl + name + "&key=" + API_KEY;
+  return queryUrl;
+}
+
+function get_rating(location_name) {
+  if (location_name == '') {
+    return 'Invalid_Name';
+  }
+  var API_KEY_P = 'XXX';
+  var queryUrl = convert_name_string(location_name);
+  var response = UrlFetchApp.fetch(queryUrl); 
+  var json = response.getContentText();
+  var place = JSON.parse(json).results[0];
+  var pid = place.place_id;
+  var place_url_base = 'https://maps.googleapis.com/maps/api/place/details/json?placeid=';
+  var place_query_url = place_url_base + pid +"&fields=formatted_address,formatted_phone_number,rating,permanently_closed,place_id&key=" + API_KEY_P;
+  var response_2 = UrlFetchApp.fetch(place_query_url);
+  var json_2 = response_2.getContentText();
+  var place_details = JSON.parse(json_2).result;
+  
+  return [[
+            place_details.rating,
+            place_details.permanently_closed]]
+}
+
+
