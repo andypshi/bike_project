@@ -1,0 +1,50 @@
+function Locator_Macro() {
+  var app = SpreadsheetApp;
+  var slsheet = app.getActiveSpreadsheet().getSheetByName("Store_Locator");
+  var storesheet = app.getActiveSpreadsheet().getSheetByName("Dealer_Assembly_Partners");
+  var Avals = slsheet.getRange("A1:A").getValues();
+  var last_row = Avals.filter(String).length;
+  Logger.log(last_row);
+  
+  var first_row = getFirstEmptyRowByColumnArray();
+  Logger.log(first_row);
+  
+  
+  for(var i = first_row; i<last_row+1; i++){
+  var locate_query = '=query(Dealer_Assembly_Partners!A2:O1000, "select G,A,B,O where A is not null order by O asc limit 1")';
+  var locate_query_sec = '=query(Dealer_Assembly_Partners!A2:O1000, "select G,A,B,O where A is not null order by O asc limit 1 offset 1")'
+  slsheet.getRange(i,5,1,2).copyTo(storesheet.getRange('Dealer_Assembly_Partners!M2:N2'), SpreadsheetApp.CopyPasteType.PASTE_VALUES, false);
+  Utilities.sleep(500);
+  slsheet.getRange(i,7).setFormula(locate_query);
+  Utilities.sleep(500);
+  SpreadsheetApp.flush();
+  slsheet.getRange(i,12).setFormula(locate_query_sec);
+  Utilities.sleep(500);
+  SpreadsheetApp.flush();
+  slsheet.getRange(i,5,1,6).copyTo(slsheet.getRange(i,5,1,6), SpreadsheetApp.CopyPasteType.PASTE_VALUES, false)
+  slsheet.getRange(i,12,1,4).copyTo(slsheet.getRange(i,12,1,4), SpreadsheetApp.CopyPasteType.PASTE_VALUES, false)}
+  
+  for(var i = first_row; i<last_row+1; i++){
+  slsheet.getRange(i,11).setFormula('=drivingmiles(D' + i +',I'+ i +')')
+  slsheet.getRange(i,16).setFormula('=drivingmiles(D' + i +',N'+ i +')');
+  Utilities.sleep(10);
+  SpreadsheetApp.flush()} 
+  
+  Utilities.sleep(10000);
+  slsheet.getRange(1,11,last_row,1).copyTo(slsheet.getRange(1,11,last_row,1), SpreadsheetApp.CopyPasteType.PASTE_VALUES, false);
+  slsheet.getRange(1,16,last_row,1).copyTo(slsheet.getRange(1,16,last_row,1), SpreadsheetApp.CopyPasteType.PASTE_VALUES, false);
+ 
+  
+}
+
+
+function getFirstEmptyRowByColumnArray(){
+var app = SpreadsheetApp;
+var slsheet = app.getActiveSpreadsheet().getSheetByName("Store_Locator");
+var column = slsheet.getRange('H:H')
+  var values = column.getValues();
+  var ct = 0;
+  while ( values[ct] && values[ct][0] != "" ) {
+    ct++;
+  }
+  return (ct+1);}
